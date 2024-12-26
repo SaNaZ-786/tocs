@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+    environment {
+        SERVER_USER = 'ubuntu' // Ensure this matches your server username
+        SERVER_IP = '16.170.238.30' // Replace with your server's IP
+        TARGET_DIR = '/var/www/html' // Ensure this matches your server's target directory
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building...'
+                // Add actual build commands if applicable
+                // Example for Node.js: sh 'npm install && npm run build'
+            }
+        }
+        stage('Deploy to Apache Server') {
+            steps {
+                sshagent(['apache']) { // Replace 'apache' with your actual SSH credentials ID
+                    sh '''
+                    # Clean up target directory on the server
+                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "rm -rf ${TARGET_DIR}/*" || { echo "Failed to clean up target directory"; exit 1; }
+                    
+                    # Copy files to the server
+                    scp -o StrictHostKeyChecking=no -r * ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR} || { echo "Failed to copy files"; exit 1; }
+                    
+                    # Restart Apache server
+                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo systemctl restart apache2" || { echo "Failed to restart Apache"; exit 1; }
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Deployment Successful!'
+        }
+        failure {
+            echo 'Deployment Failed!'
+        }
+    }
+}
