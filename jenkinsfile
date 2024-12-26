@@ -16,19 +16,20 @@ pipeline {
                 echo 'Building...'
                 // Add actual build commands if applicable
                 // Example for Node.js: sh 'npm install && npm run build'
+                // If using a Node.js or other build process, make sure to adjust this section
             }
         }
         stage('Deploy to Apache Server') {
             steps {
                 sshagent(['apache']) { // Replace 'apache' with your actual SSH credentials ID
                     sh '''
-                    # Clean up target directory on the server
+                    echo "Cleaning up target directory on the server..."
                     ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "rm -rf ${TARGET_DIR}/*" || { echo "Failed to clean up target directory"; exit 1; }
-                    
-                    # Copy files to the server
+
+                    echo "Copying files to the server..."
                     scp -o StrictHostKeyChecking=no -r * ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR} || { echo "Failed to copy files"; exit 1; }
-                    
-                    # Restart Apache server
+
+                    echo "Restarting Apache server..."
                     ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo systemctl restart apache2" || { echo "Failed to restart Apache"; exit 1; }
                     '''
                 }
@@ -44,3 +45,4 @@ pipeline {
         }
     }
 }
+
