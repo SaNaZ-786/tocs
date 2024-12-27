@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         SERVER_USER = 'ubuntu' // Ensure this matches your server username
-        SERVER_IP = '16.170.238.30' // Replace with your server's IP
+        SERVER_IP = '13.53.170.39'// Replace with your server's IP
         TARGET_DIR = '/var/www/html' // Ensure this matches your server's target directory
     }
     stages {
